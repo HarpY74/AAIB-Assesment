@@ -16,9 +16,5 @@ public class OpenBrowser {
         driver.manage().window().maximize();
     }
 
-//    public void tearDown() {
-//        if (driver != null) {
-//            driver.quit();
-//        }
-//    }
+
 }
