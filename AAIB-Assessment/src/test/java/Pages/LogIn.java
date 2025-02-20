@@ -55,10 +55,10 @@ public class LogIn extends OpenBrowser {
                 if (cell != null) {
                     switch (cell.getCellType()) {
                         case STRING:
-                            data[i - 1][j] = cell.getStringCellValue().trim(); // Trim any extra spaces
+                            data[i - 1][j] = cell.getStringCellValue().trim();
                             break;
                         case NUMERIC:
-                            data[i - 1][j] = String.valueOf((int) cell.getNumericCellValue()); // Convert numeric to String
+                            data[i - 1][j] = String.valueOf((int) cell.getNumericCellValue());
                             break;
                         default:
                             data[i - 1][j] = "";

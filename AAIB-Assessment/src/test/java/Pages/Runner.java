@@ -34,12 +34,9 @@ public class Runner {
 
     @Test(priority = 4, dataProvider = "paymentData", dataProviderClass = PaymentAndConfirmOrder.class)
     public void confirmOrder(String nameOnCard, String cardNumber, String cvc, String expiryMonth, String expiryYear) {
-        System.out.println("Processing payment for: " + nameOnCard);
         confirm.setPaymentAndConfirm(nameOnCard, cardNumber, cvc, expiryMonth, expiryYear);
+
     }
 
-//    @AfterMethod
-//    public void tearDown() {
-//        open.tearDown();
-//    }
+
 }
