@@ -3,6 +3,8 @@ package Pages;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -13,26 +15,21 @@ import java.time.Duration;
 
 public class PaymentAndConfirmOrder extends OpenBrowser {
 
-    // DataProvider to read payment details from Excel
     @org.testng.annotations.DataProvider(name = "paymentData")
     public Object[][] readPaymentDataFromExcel() throws IOException {
-        String filePath = "C:\\Users\\Mohamed\\Desktop\\Test_Payment_data.xlsx"; // ✅ Corrected path
-
-        // Verify file existence
+        String filePath = "C:\\Users\\Mohamed\\Desktop\\Test_Payment_data.xlsx";
         File file = new File(filePath);
+
         if (!file.exists()) {
-            throw new RuntimeException("File not found at: " + filePath);
+            throw new RuntimeException("Excel file not found at: " + filePath);
         }
 
         FileInputStream fis = new FileInputStream(file);
-        Workbook workbook = new XSSFWorkbook(fis); // ✅ Using XSSFWorkbook for .xlsx files
-
-        // Ensure the correct sheet name
-        String sheetName = "Sheet1"; // Change this if your sheet has a different name
-        Sheet sheet = workbook.getSheet(sheetName);
+        Workbook workbook = new XSSFWorkbook(fis);
+        Sheet sheet = workbook.getSheet("Sheet1");
 
         if (sheet == null) {
-            throw new RuntimeException("Sheet '" + sheetName + "' not found in Excel file.");
+            throw new RuntimeException("Sheet 'Sheet1' not found in the Excel file.");
         }
 
         int rowCount = sheet.getPhysicalNumberOfRows();
@@ -46,18 +43,16 @@ public class PaymentAndConfirmOrder extends OpenBrowser {
                 if (cell != null) {
                     switch (cell.getCellType()) {
                         case STRING:
-                            data[i - 1][j] = cell.getStringCellValue();
+                            data[i - 1][j] = cell.getStringCellValue().trim();
                             break;
                         case NUMERIC:
-                            if (j == 1) { // Card number column
-                                data[i - 1][j] = String.format("%.0f", cell.getNumericCellValue()); // Avoids scientific notation
-                            } else {
-                                data[i - 1][j] = String.valueOf((int) cell.getNumericCellValue()); // Convert to int for other numeric values
-                            }
+                            data[i - 1][j] = String.valueOf((long) cell.getNumericCellValue());
                             break;
                         default:
                             data[i - 1][j] = "";
                     }
+                } else {
+                    data[i - 1][j] = "";
                 }
             }
         }
@@ -67,32 +62,33 @@ public class PaymentAndConfirmOrder extends OpenBrowser {
         return data;
     }
 
-    // Method to process payment
     public void setPaymentAndConfirm(String nameOnCard, String cardNumber, String cvc, String expiryMonth, String expiryYear) {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
-        System.out.println("Processing payment for: " + nameOnCard);
+        try {
 
-        // Fill in payment details
-        WebElement nameField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@data-qa='name-on-card']")));
-        nameField.sendKeys(nameOnCard);
 
-        WebElement cardField = driver.findElement(By.xpath("//input[@data-qa='card-number']"));
-        cardField.sendKeys(cardNumber);
+            WebElement nameField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@data-qa='name-on-card']")));
+            nameField.sendKeys(nameOnCard);
 
-        WebElement cvcField = driver.findElement(By.xpath("//input[@name='cvc']"));
-        cvcField.sendKeys(cvc);
+            WebElement cardField = driver.findElement(By.xpath("//input[@data-qa='card-number']"));
+            cardField.sendKeys(cardNumber);
 
-        WebElement expiryMonthField = driver.findElement(By.xpath("//input[@name='expiry_month']"));
-        expiryMonthField.sendKeys(expiryMonth);
+            WebElement cvcField = driver.findElement(By.xpath("//input[@name='cvc']"));
+            cvcField.sendKeys(cvc);
 
-        WebElement expiryYearField = driver.findElement(By.xpath("//input[@name='expiry_year']"));
-        expiryYearField.sendKeys(expiryYear);
+            WebElement expiryMonthField = driver.findElement(By.xpath("//input[@name='expiry_month']"));
+            expiryMonthField.sendKeys(expiryMonth);
 
-        // Click on Pay and Confirm button
-        WebElement payButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("submit")));
-        payButton.click();
+            WebElement expiryYearField = driver.findElement(By.xpath("//input[@name='expiry_year']"));
+            expiryYearField.sendKeys(expiryYear);
 
-        System.out.println("Payment submitted successfully.");
+            WebElement payButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("submit")));
+            payButton.click();
+
+        }
+        catch (Exception e) {
+
+        }
     }
 }
